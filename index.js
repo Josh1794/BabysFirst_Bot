@@ -1,5 +1,6 @@
 import Twit from 'twit';
-console.log('HELLO ---> ', process.env.API_KEY);
+import * as dotenv from 'dotenv'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+dotenv.config();
 
 const T = new Twit({
   consumer_key: process.env.API_KEY,
@@ -8,35 +9,42 @@ const T = new Twit({
   access_token_secret: process.env.ACCESS_TOKEN_SECRET,
 });
 
-let params = {
-  q: '#100DaysOfCode since:20200606',
-  count: 10,
-};
+T.get(
+  'account/verify_credentials',
+  {
+    include_entities: false,
+    skip_status: true,
+    include_email: false,
+  },
+  onAuthenticated
+);
 
-function tweetResult(err, data, response) {
-  console.log(data);
-  var tweets = data.statuses;
+function onAuthenticated(err, res) {
+  if (err) {
+    throw err;
+  }
 
-  tweets.map((tweet) => {
-    console.log('TWEET HERE----> \n', tweet.text);
-  });
+  console.log('Authentication successful. Running bot...\r\n');
 }
 
-T.get('search/tweets', params, tweetResult);
-// T.get(
-//   'account/verify_credentials',
-//   {
-//     include_entities: false,
-//     skip_status: true,
-//     include_email: false,
-//   },
-//   onAuthenticated
-// );
+T.post(
+  'statuses/update',
+  { status: 'hello world!' },
+  function (err, data, response) {
+    console.log(data);
+  }
+);
 
-// function onAuthenticated(err, res) {
-//   if (err) {
-//     throw err;
-//   }
+// let params = {
+//   q: '#100DaysOfCode since:20200606',
+//   count: 10,
+// };
 
-//   console.log('Authentication successful. Running bot...\r\n');
+// function tweetResult(err, data, response) {
+//   var tweets = data.statuses;
+//   tweets.map((tweet) => {
+//     console.log('TWEET HERE----> \n', tweet.text);
+//   });
 // }
+
+// T.get('search/tweets', params, tweetResult);
